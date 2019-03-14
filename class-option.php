@@ -86,7 +86,7 @@ class DBM_Csv_option {
 	}
 
 	public function ignore_first_line() {
-		return $this->ignore_first_line == "1";
+		return $this->ignore_first_line;
 	}
 
 	public function id() {

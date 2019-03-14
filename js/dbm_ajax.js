@@ -57,10 +57,13 @@
                         if (num < 100) {
                             gogo();
                         } else {
-                            closeBar();
+                            //closeBar();
                             location.reload();
                         }
-                    }
+                    },
+                    error:function() {
+                        location.reload();
+                    },
                 });
                 first_para++;
             },200);

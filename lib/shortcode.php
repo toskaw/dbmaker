@@ -1,10 +1,24 @@
 <?php
 function DBM_shortcode_search ($atts, $content) {
+	$param = shortcode_atts( array(
+		'post_type' => '',
+		'posts_per_page' => '5',
+		'pager' => '',
+	), $atts );
+	if ($param['pager'])  {
+		$pager_nonce = wp_create_nonce('DBM_search_pager');
+	}
 	ob_start();
 ?>
 <form role="search" method="post" class="ajax-search-form" >
         <?php echo do_shortcode($content); ?>
-        <input type="hidden" name="post_type"  value="<?php echo $atts['post_type']; ?>" />
+<?php
+		if ($param['pager']) {
+			echo "<input type='hidden' name='pager_nonce' value='$pager_nonce' />\n";
+		}
+?>
+        <input type="hidden" name="post_type"  value="<?php echo $param['post_type']; ?>" />
+        <input type="hidden" id="posts_per_page" name="posts_per_page"  value="<?php echo $param['posts_per_page']; ?>" />
 	<div style="text-align:center;"><button type="submit" class="ajax search-submit" value="search">この条件で検索する</button></div>
 </form>
 <?php
@@ -120,9 +134,38 @@ function DBM_shortcode_result_table($atts) {
 	}
 	return ob_get_clean();
 }
+
+function DBM_shortcode_result_pager($atts) {
+	ob_start();
+?>
+<div class="ko-pager" data-bind="with: pager, visible: pager.items().length != 0">
+    <a class="btn btn-small" data-bind="click: goToFirst"> 最初 </a>
+    <a class="btn btn-small" data-bind="click: goToPrev"> 前ページ </a>
+    <span data-bind="text: current"></span>/<span data-bind="text: pages"></span>
+    <a class="btn btn-small" data-bind="click: goToNext"> 次ページ </a>
+    <a class="btn btn-small" data-bind="click: goToLast"> 最後 </a>
+    <span class="pager-summary" data-bind="visible: !isLoading()">
+        <!--ko if: count() > 0 -->
+        <span data-bind="text: count"> </span> 件中
+        <span data-bind="text: offset() + 1"> </span> ～
+        <span data-bind="text: offset() + items().length"> </span> 件目を表示中
+        <!--/ko-->
+        <!--ko if: count() == 0 -->
+        アイテムが登録されていません
+        <!--/ko-->
+    </span>
+    <span class="indicator" data-bind="visible: isLoading">
+        <!-- 実際はローディング画像を入れる -->
+        now loading ...
+    </span>
+</div>
+<?php
+	return ob_get_clean();
+}
 add_shortcode( 'DBM_search', 'DBM_shortcode_search' );
 add_shortcode( 'DBM_tax_checkbox', 'DBM_shortcode_tax_checkbox' );
 add_shortcode( 'DBM_tax_select', 'DBM_shortcode_tax_select' );
 add_shortcode( 'DBM_tax_label', 'DBM_shortcode_tax_label' );
 add_shortcode( 'DBM_textbox', 'DBM_shortcode_textbox' );
 add_shortcode( 'DBM_result_table', 'DBM_shortcode_result_table' );
+add_shortcode( 'DBM_result_pager', 'DBM_shortcode_result_pager' );

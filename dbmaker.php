@@ -108,18 +108,24 @@ function DBM_admin_enqueue_scripts($hook_suffix) {
 		// Register the script first.
 		wp_register_script( 'DBM_ajax_js', plugins_url('js/dbm_ajax.js', __FILE__) );
 		$screen = get_current_screen();
-		// 引数作成
-		wp_localize_script('DBM_ajax_js', 'PARAM', array(
-			'ajax_url' => admin_url('admin-ajax.php'),
-			'delete_all' => 'DBM_delete_all',
-			'import_csv' => 'DBM_import_csv',
-			'post_type' => $screen->post_type,
-			'nonce' => wp_create_nonce('DBM_delete_all'),
-		));
-		// 読み込むスクリプトファイル(※依存関係:jquery)
-		wp_enqueue_style('modaal_css','//cdn.jsdelivr.net/npm/modaal@0.4.4/dist/css/modaal.min.css');
-		wp_enqueue_script('modaal_js', '//cdn.jsdelivr.net/npm/modaal@0.4.4/dist/js/modaal.min.js');
-		wp_enqueue_script('DBM_ajax_js', plugins_url('js/dbm_ajax.js', __FILE__), array('jquery'), null, true);
+		$post_type = $screen->post_type;
+		$types = DBM_Csv_option::get_posttype_list();
+		if (in_array($post_type, $types)) {
+			// 引数作成
+			wp_localize_script('DBM_ajax_js', 'PARAM', array(
+				'ajax_url' => admin_url('admin-ajax.php'),
+				'delete_all' => 'DBM_delete_all',
+				'import_csv' => 'DBM_import_csv',
+				'post_type' => $screen->post_type,
+				'nonce' => wp_create_nonce('DBM_delete_all'),
+			));
+			// stop heartbeat
+			wp_deregister_script('heartbeat');
+			// 読み込むスクリプトファイル(※依存関係:jquery)
+			wp_enqueue_style('modaal_css','//cdn.jsdelivr.net/npm/modaal@0.4.4/dist/css/modaal.min.css');
+			wp_enqueue_script('modaal_js', '//cdn.jsdelivr.net/npm/modaal@0.4.4/dist/js/modaal.min.js');
+			wp_enqueue_script('DBM_ajax_js', plugins_url('js/dbm_ajax.js', __FILE__), array('jquery'), null, true);
+		}
 	}
 }
 // "custom_enqueue" 関数を管理画面のキューアクションにフック
@@ -219,7 +225,7 @@ function DBM_import_csv() {
 					$_SESSION['total'] = $count;
 					$_SESSION['start'] = 0;
 					if ($options->ignore_first_line()) {
-						$_SESSION['start'] = 1;
+						$_SESSION['start'] = $options->ignore_first_line();
 					}
 				} else {
 					status_header('500');
@@ -240,6 +246,7 @@ function DBM_import_csv() {
 		if ($_SESSION['start'] != 0) {
 			$file->seek($_SESSION['start']);
 		}
+		set_time_limit(0);
 		wp_defer_term_counting( true );
 		wp_defer_comment_counting( true );
 		$wpdb->query( 'SET autocommit = 0;' );
@@ -247,7 +254,7 @@ function DBM_import_csv() {
 			$GLOBALS['wpdb']->query( 'COMMIT;' );
 		} );
 
-		for ($i = 0; $i < 1000; $i++) {
+		for ($i = 0; $i < 100; $i++) {
 			if (!$file->eof()) {
 				$data = $file->readline();
 				$post = array();
@@ -419,6 +426,12 @@ function DBM_search() {
 	if (isset($_REQUEST['nonce']) && wp_verify_nonce($_REQUEST['nonce'], 'DBM_search')) {
 		if (isset($_REQUEST['post_type'])) {
 			$post_type = $_REQUEST['post_type'];
+			if (isset($_REQUEST['pager_nonce']) && wp_verify_nonce($_REQUEST['pager_nonce'], 'DBM_search_pager')) {
+				$pager_enable = true;
+			}
+			else {
+				$pager_enable = false;
+			}
 			$types = DBM_Csv_option::get_posttype_list();
 			if (in_array($post_type, $types)) {
 				$options = DBM_Csv_option::getInstance($post_type);
@@ -426,6 +439,15 @@ function DBM_search() {
 				$args = array();
 				$args['post_type'] = $post_type;
 				$args['posts_per_page'] = 5;
+				if (isset($_REQUEST['posts_per_page'])) {
+					$args['posts_per_page'] = $_REQUEST['posts_per_page'];
+				}
+				if (isset($_REQUEST['paged']) && $pager_enable) {
+					$args['paged'] = $_REQUEST['paged'];
+				}
+				else {
+					$args['paged'] = 1;
+				}
 				$args['tax_query'] = array();
 				$set_tax = false;
 				$args['meta_query'] = array();
@@ -433,6 +455,9 @@ function DBM_search() {
 				if (isset($_REQUEST['s'])) {
 					// keyword
 					$args['s'] = $_REQUEST['s'];
+				}
+				else {
+					$args['s'] = '';
 				}
 				foreach ($param_list as $key) {
 					if (isset($_REQUEST[$key])) {
@@ -552,10 +577,20 @@ function DBM_search() {
 						$objects[] = $object;
 					}
 				}
-				$response = array(
-					'success'   => true,
-					'data'      => $objects,
-				);
+				if ($pager_enable) {
+					$response = array(
+						'success'   => true,
+						'data'      => $objects,
+						'found_posts' => $query->found_posts,
+						'paged' => $args['paged'],
+					);
+				}
+				else {
+					$response = array(
+						'success'   => true,
+						'data'      => $objects,
+					);
+				}
 				wp_send_json( $response );
 			}
 		}
@@ -577,7 +612,7 @@ function DBM_insert_csv_fields() {
 	wp_nonce_field( 'DBM_save_csv_fields', 'DBM_meta_box_nonce' );
 
 	echo '<strong>投稿タイプ</strong>:投稿タイプ名を指定する<br/> <input type="text" name="save_post_type" value="'.get_post_meta($post->ID, 'save_post_type', true).'" size="50" /><br>';
-	echo '<strong>フォーマット</strong>：csvファイルの項目名をカンマ区切りで入力する </br> <input type="text" name="format" value="'.get_post_meta($post->ID, 'format', true).'" size="50" /><br>';
+	echo '<strong>フォーマット</strong>：csvファイルの項目名をカンマ区切りで入力する </br> <input type="text" name="format" value="'.get_post_meta($post->ID, 'format', true).'" style="width:100%;"  /><br>';
 	echo '<strong>ステータス</strong>： インポート時の初期ステータス<br/><select name="status">';
 	$list = array(
 		'publish', 'draft', 'pending', 'private'
@@ -604,10 +639,11 @@ function DBM_insert_csv_fields() {
 		}
 	}
 	echo '</select><br/>';
-	if( get_post_meta($post->ID,'ignore_firstline',true) == "1" ) {
-		$csv_label_check = "checked";
-	}//チェックされていたらcheckedを挿入
-	echo '<strong>1行目をスキップ</strong>： <input type="checkbox" name="ignore_firstline" value="1" '.$csv_label_check.' ><br/>';
+	$skip = get_post_meta($post->ID,'ignore_firstline',true);
+	if (empty($skip)) {
+		$skip = "0";
+	}
+	echo '<strong>スキップする行数</strong>： <input type="text" name="ignore_firstline" value="'.$skip.'" /><br/>';
 	if( get_post_meta($post->ID,'public_post_type',true) == "1" ) {
 		$csv_label_check = "checked";
 	}//チェックされていたらcheckedを挿入
@@ -748,6 +784,7 @@ function DBM_posts_search_custom_fields( $orig_search, $query ) {
 	}
 	if ( $query->is_search() && is_main_query() && !empty($post_type) && in_array($post_type, DBM_Csv_option::get_posttype_list()) ) {
 		global $wpdb;
+		$search = '';
 		$q = $query->query_vars;
 		$n = ! empty( $q['exact'] ) ? '' : '%';
 		$searchand = '';
@@ -861,7 +898,7 @@ function DBM_default_search_form($post_type) {
 	ob_start();
 	$types = DBM_Csv_option::get_posttype_list();
 	if (in_array($post_type, $types)) {
-		echo "[DBM_search post_type='" . $post_type . "']\n";
+		echo "[DBM_search post_type='" . $post_type . "' pager='true']\n";
 		echo "[DBM_textbox]\n";
 		$options = DBM_Csv_option::getInstance($post_type);
 		$taxonomys = $options->get_taxonomys();
@@ -870,7 +907,7 @@ function DBM_default_search_form($post_type) {
 			echo "[DBM_tax_select name='" . $taxonomy ."' ]\n";
 		}
 		echo "[/DBM_search]\n";
-		echo "<div>\n[DBM_result_table label='" . $options->rawformat() . "' data='" . $options->rawformat() . "']\n</div>\n";
+		echo "<div>\n [DBM_result_pager]\n[DBM_result_table label='" . $options->rawformat() . "' data='" . $options->rawformat() . "']\n</div>\n";
 	}
 	return ob_get_clean();
 }
