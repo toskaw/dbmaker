@@ -30,8 +30,8 @@ require "class-option.php";
 require "class-csvimport.php";
 require "lib/shortcode.php";
 
-add_action('init','DBM_init');
-function DBM_init() {
+add_action('init','dbm_init');
+function dbm_init() {
 	register_post_type('csv', array(
 		'labels' => array(
 			'name' => __('DataBase Maker'),
@@ -69,19 +69,19 @@ function DBM_init() {
 			register_taxonomy_for_object_type($item, $type);
 		}
 		// sortableカラム登録
-		add_filter("manage_edit-{$type}_sortable_columns", "DBM_sortable_columns");
+		add_filter("manage_edit-{$type}_sortable_columns", "dbm_sortable_columns");
 	}
 
-	DBM_init_sessions();
+	dbm_init_sessions();
 }
 
-function DBM_init_sessions() {
+function dbm_init_sessions() {
 	if (!session_id()) {
 		session_start();
 	}
 }
-add_action('manage_posts_extra_tablenav', 'DBM_add_button' );
-function DBM_add_button($which)
+add_action('manage_posts_extra_tablenav', 'dbm_add_button' );
+function dbm_add_button($which)
 {
 	global $post_type;
 	$option = DBM_Csv_option::getInstance($post_type);
@@ -102,36 +102,36 @@ function DBM_add_button($which)
 }
 
 // フックする関数
-function DBM_admin_enqueue_scripts($hook_suffix) {
+function dbm_admin_enqueue_scripts($hook_suffix) {
 	// edit.phpのみ
 	if( 'edit.php' == $hook_suffix ) {
 		// Register the script first.
-		wp_register_script( 'DBM_ajax_js', plugins_url('js/dbm_ajax.js', __FILE__) );
+		wp_register_script( 'dbm_ajax_js', plugins_url('js/dbm_ajax.js', __FILE__) );
 		$screen = get_current_screen();
 		$post_type = $screen->post_type;
 		$types = DBM_Csv_option::get_posttype_list();
 		if (in_array($post_type, $types)) {
 			// 引数作成
-			wp_localize_script('DBM_ajax_js', 'PARAM', array(
+			wp_localize_script('dbm_ajax_js', 'PARAM', array(
 				'ajax_url' => admin_url('admin-ajax.php'),
-				'delete_all' => 'DBM_delete_all',
-				'import_csv' => 'DBM_import_csv',
+				'delete_all' => 'dbm_delete_all',
+				'import_csv' => 'dbm_import_csv',
 				'post_type' => $screen->post_type,
-				'nonce' => wp_create_nonce('DBM_delete_all'),
+				'nonce' => wp_create_nonce('dbm_delete_all'),
 			));
 			// stop heartbeat
 			wp_deregister_script('heartbeat');
 			// 読み込むスクリプトファイル(※依存関係:jquery)
 			wp_enqueue_style('modaal_css','//cdn.jsdelivr.net/npm/modaal@0.4.4/dist/css/modaal.min.css');
 			wp_enqueue_script('modaal_js', '//cdn.jsdelivr.net/npm/modaal@0.4.4/dist/js/modaal.min.js');
-			wp_enqueue_script('DBM_ajax_js', plugins_url('js/dbm_ajax.js', __FILE__), array('jquery'), null, true);
+			wp_enqueue_script('dbm_ajax_js', plugins_url('js/dbm_ajax.js', __FILE__), array('jquery'), null, true);
 		}
 	}
 }
 // "custom_enqueue" 関数を管理画面のキューアクションにフック
-add_action( 'admin_enqueue_scripts', 'DBM_admin_enqueue_scripts' );
+add_action( 'admin_enqueue_scripts', 'dbm_admin_enqueue_scripts' );
 
-function DBM_enqueue_scripts() {
+function dbm_enqueue_scripts() {
 
 	$script_load = false;
 	
@@ -140,23 +140,23 @@ function DBM_enqueue_scripts() {
 	}
 	$script_load = apply_filters('dbm_script_load_flag', $script_load);
 	if ($script_load) {
-		wp_register_script( 'DBM_ajax_search', plugins_url('js/dbm_ajax_search.js', __FILE__) );
+		wp_register_script( 'dbm_ajax_search', plugins_url('js/dbm_ajax_search.js', __FILE__) );
 		// 引数作成
-		wp_localize_script('DBM_ajax_search', 'PARAM', array(
+		wp_localize_script('dbm_ajax_search', 'PARAM', array(
 			'ajax_url' => admin_url('admin-ajax.php'),
-			'search' => 'DBM_search',
-			'nonce' => wp_create_nonce('DBM_search'),
+			'search' => 'dbm_search',
+			'nonce' => wp_create_nonce('dbm_search'),
 		));
 		wp_enqueue_script('jquery_validation', 'https://cdn.jsdelivr.net/npm/jquery-validation@1.19.0/dist/jquery.validate.min.js', array('jquery'));
 		wp_enqueue_script('knockout', plugins_url('js/knockout-min.js', __FILE__));
-		wp_enqueue_script('DBM_ajax_search', plugins_url('js/dbm_ajax_search.js', __FILE__), array('jquery'), null, true);
+		wp_enqueue_script('dbm_ajax_search', plugins_url('js/dbm_ajax_search.js', __FILE__), array('jquery'), null, true);
 	}
 }
-add_action( 'wp_enqueue_scripts', 'DBM_enqueue_scripts' );
+add_action( 'wp_enqueue_scripts', 'dbm_enqueue_scripts' );
 
-function DBM_delete_all() {
+function dbm_delete_all() {
 	global $wpdb;
-	if (isset($_REQUEST['nonce']) && wp_verify_nonce($_REQUEST['nonce'], 'DBM_delete_all')) {
+	if (isset($_REQUEST['nonce']) && wp_verify_nonce($_REQUEST['nonce'], 'dbm_delete_all')) {
 		$post_type = $_POST['post_type'];
 		$counts = wp_count_posts($post_type);
 		$remains = $counts->publish + $counts->draft + $counts->private + $counts->future + $counts->pending;
@@ -217,11 +217,11 @@ function DBM_delete_all() {
 	die();
 }
 
-add_action('wp_ajax_DBM_delete_all', 'DBM_delete_all');
+add_action('wp_ajax_dbm_delete_all', 'dbm_delete_all');
 
-function DBM_import_csv() {
+function dbm_import_csv() {
 	global $wpdb;
-	if (isset($_REQUEST['nonce']) && wp_verify_nonce($_REQUEST['nonce'], 'DBM_delete_all')) {
+	if (isset($_REQUEST['nonce']) && wp_verify_nonce($_REQUEST['nonce'], 'dbm_delete_all')) {
 		// 設定値取得
 		$options = DBM_Csv_option::getInstance($_POST['post_type']);
 		if (isset($_REQUEST['first']) && $_REQUEST['first'] == 'true') {
@@ -428,15 +428,15 @@ function DBM_import_csv() {
 	}
 	die();
 }
-add_action('wp_ajax_DBM_import_csv', 'DBM_import_csv');
+add_action('wp_ajax_dbm_import_csv', 'dbm_import_csv');
 
-add_action( 'wp_ajax_DBM_search', 'DBM_search');
-add_action( 'wp_ajax_nopriv_DBM_search', 'DBM_search');
-function DBM_search() {
-	if (isset($_REQUEST['nonce']) && wp_verify_nonce($_REQUEST['nonce'], 'DBM_search')) {
+add_action( 'wp_ajax_dbm_search', 'dbm_search');
+add_action( 'wp_ajax_nopriv_dbm_search', 'dbm_search');
+function dbm_search() {
+	if (isset($_REQUEST['nonce']) && wp_verify_nonce($_REQUEST['nonce'], 'dbm_search')) {
 		if (isset($_REQUEST['post_type'])) {
 			$post_type = $_REQUEST['post_type'];
-			if (isset($_REQUEST['pager_nonce']) && wp_verify_nonce($_REQUEST['pager_nonce'], 'DBM_search_pager')) {
+			if (isset($_REQUEST['pager_nonce']) && wp_verify_nonce($_REQUEST['pager_nonce'], 'dbm_search_pager')) {
 				$pager_enable = true;
 			}
 			else {
@@ -610,16 +610,16 @@ function DBM_search() {
 
 
 // 固定カスタムフィールドボックス
-function DBM_add_fields() {
-	add_meta_box( 'csv_settings', 'csv設定', 'DBM_insert_csv_fields', 'csv', 'normal', 'high');
+function dbm_add_fields() {
+	add_meta_box( 'csv_settings', 'csv設定', 'dbm_insert_csv_fields', 'csv', 'normal', 'high');
 }
-add_action('add_meta_boxes_csv', 'DBM_add_fields');
+add_action('add_meta_boxes_csv', 'dbm_add_fields');
  
 // csv設定入力エリア
-function DBM_insert_csv_fields() {
+function dbm_insert_csv_fields() {
 	global $post;
 	// nonceフィールドを追加して後でチェックする
-	wp_nonce_field( 'DBM_save_csv_fields', 'DBM_meta_box_nonce' );
+	wp_nonce_field( 'dbm_save_csv_fields', 'dbm_meta_box_nonce' );
 
 	echo '<strong>投稿タイプ</strong>:投稿タイプ名を指定する<br/> <input type="text" name="save_post_type" value="'.get_post_meta($post->ID, 'save_post_type', true).'" size="50" /><br>';
 	echo '<strong>フォーマット</strong>：csvファイルの項目名をカンマ区切りで入力する </br> <input type="text" name="format" value="'.get_post_meta($post->ID, 'format', true).'" style="width:100%;"  /><br>';
@@ -662,7 +662,7 @@ function DBM_insert_csv_fields() {
  
 
 // カスタムフィールドの値を保存
-function DBM_save_csv_fields( $post_id , $post, $update) {
+function dbm_save_csv_fields( $post_id , $post, $update) {
 	$csv_post_field = array(
 		'save_post_type', 
 		'format',
@@ -672,12 +672,12 @@ function DBM_save_csv_fields( $post_id , $post, $update) {
 		'public_post_type',
 		'dbm_search_form');
 	// nonceがセットされているかどうか確認
-	if ( ! isset( $_POST['DBM_meta_box_nonce'] ) ) {
+	if ( ! isset( $_POST['dbm_meta_box_nonce'] ) ) {
 		return;
 	}
 
 	// nonceが正しいかどうか検証
-	if ( ! wp_verify_nonce( $_POST['DBM_meta_box_nonce'], 'DBM_save_csv_fields' ) ) {
+	if ( ! wp_verify_nonce( $_POST['dbm_meta_box_nonce'], 'dbm_save_csv_fields' ) ) {
 		return;
 	}
 
@@ -696,15 +696,15 @@ function DBM_save_csv_fields( $post_id , $post, $update) {
 
 	// contentが空の場合、デフォルトフォームで更新
 	if (empty($post->post_content) && !empty($_POST['save_post_type'])) {
-		$post->post_content = DBM_default_search_form($_POST['save_post_type']);
+		$post->post_content = dbm_default_search_form($_POST['save_post_type']);
 		// 無限ループ回避のため、フックを削除
-		remove_action('save_post_csv', 'DBM_save_csv_fields');
+		remove_action('save_post_csv', 'dbm_save_csv_fields');
 		wp_update_post($post);
 		// 改めてフック
-		add_action('save_post_csv', 'DBM_save_csv_fields', 10, 3);
+		add_action('save_post_csv', 'dbm_save_csv_fields', 10, 3);
 	}
 }
-add_action('save_post_csv', 'DBM_save_csv_fields', 10, 3);
+add_action('save_post_csv', 'dbm_save_csv_fields', 10, 3);
 
 $ignores = array(
 	'post_name',
@@ -723,7 +723,7 @@ $ignores = array(
 	'post_tags'
 );
 
-function DBM_add_columns($columns, $post_type) {
+function dbm_add_columns($columns, $post_type) {
 	global $ignores;
 	$types = DBM_Csv_option::get_posttype_list();
 	if (in_array($post_type, $types)) {
@@ -738,9 +738,9 @@ function DBM_add_columns($columns, $post_type) {
 	return $columns;
 }
 
-add_filter( 'manage_posts_columns', 'DBM_add_columns', 10, 2);
+add_filter( 'manage_posts_columns', 'dbm_add_columns', 10, 2);
 
-function DBM_custom_column($column, $post_id) {
+function dbm_custom_column($column, $post_id) {
 	global $ignores;
 	$post = get_post($post_id);
 	$types = DBM_Csv_option::get_posttype_list();
@@ -767,9 +767,9 @@ function DBM_custom_column($column, $post_id) {
 		}
 	}
 }
-add_action( 'manage_posts_custom_column', 'DBM_custom_column', 10, 2);
+add_action( 'manage_posts_custom_column', 'dbm_custom_column', 10, 2);
 
-function DBM_sortable_columns($columns) {
+function dbm_sortable_columns($columns) {
 	global $ignores;
 	$screen = get_current_screen();
 	$post_type = $screen->post_type;
@@ -787,7 +787,7 @@ function DBM_sortable_columns($columns) {
 	return $columns;
 }
 
-function DBM_posts_search_custom_fields( $orig_search, $query ) {
+function dbm_posts_search_custom_fields( $orig_search, $query ) {
 	$q = $query->query_vars;
 	if (isset($q['post_type'])) {
 		$post_type = $q['post_type'];
@@ -826,12 +826,12 @@ function DBM_posts_search_custom_fields( $orig_search, $query ) {
 		return $orig_search;
 	}
 }
-add_filter( 'posts_search', 'DBM_posts_search_custom_fields', 10, 2 );
+add_filter( 'posts_search', 'dbm_posts_search_custom_fields', 10, 2 );
 
 /**
  * カスタムフィールド検索用のJOIN
  */
-function DBM_posts_join_custom_fields( $join, $query ) {
+function dbm_posts_join_custom_fields( $join, $query ) {
 	$q = $query->query_vars;
 	if (isset($q['post_type'])) {
 		$post_type = $q['post_type'];
@@ -853,9 +853,9 @@ function DBM_posts_join_custom_fields( $join, $query ) {
 	}
 	return $join;
 }
-add_filter( 'posts_join', 'DBM_posts_join_custom_fields', 10, 2 ); 
+add_filter( 'posts_join', 'dbm_posts_join_custom_fields', 10, 2 ); 
 
-function DBM_custom_orderby_columns($vars) {
+function dbm_custom_orderby_columns($vars) {
 	global $ignores;
 	if ( !is_admin() ) return $vars;
 	$screen = get_current_screen();
@@ -881,10 +881,10 @@ function DBM_custom_orderby_columns($vars) {
 	}
 	return $vars;
 }
-add_filter('request', 'DBM_custom_orderby_columns');
+add_filter('request', 'dbm_custom_orderby_columns');
 
-add_action( 'restrict_manage_posts', 'DBM_custom_taxonomies_term_filter' );
-function DBM_custom_taxonomies_term_filter() {
+add_action( 'restrict_manage_posts', 'dbm_custom_taxonomies_term_filter' );
+function dbm_custom_taxonomies_term_filter() {
 	$screen = get_current_screen();
 	$post_type = $screen->post_type;
 	$types = DBM_Csv_option::get_posttype_list();
@@ -904,20 +904,20 @@ function DBM_custom_taxonomies_term_filter() {
 	}
 }
 
-function DBM_default_search_form($post_type) {
+function dbm_default_search_form($post_type) {
 	ob_start();
 	$types = DBM_Csv_option::get_posttype_list();
 	if (in_array($post_type, $types)) {
-		echo "[DBM_search post_type='" . $post_type . "' pager='true']\n";
-		echo "[DBM_textbox]\n";
+		echo "[dbm_search post_type='" . $post_type . "' pager='true']\n";
+		echo "[dbm_textbox]\n";
 		$options = DBM_Csv_option::getInstance($post_type);
 		$taxonomys = $options->get_taxonomys();
 		
 		foreach ($taxonomys as $taxonomy) {
-			echo "[DBM_tax_select name='" . $taxonomy ."' ]\n";
+			echo "[dbm_tax_select name='" . $taxonomy ."' ]\n";
 		}
-		echo "[/DBM_search]\n";
-		echo "<div>\n [DBM_result_pager]\n[DBM_result_table label='" . $options->rawformat() . "' data='" . $options->rawformat() . "']\n</div>\n";
+		echo "[/dbm_search]\n";
+		echo "<div>\n [dbm_result_pager]\n[dbm_result_table label='" . $options->rawformat() . "' data='" . $options->rawformat() . "']\n</div>\n";
 	}
 	return ob_get_clean();
 }

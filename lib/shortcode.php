@@ -1,12 +1,12 @@
 <?php
-function DBM_shortcode_search ($atts, $content) {
+function dbm_shortcode_search ($atts, $content) {
 	$param = shortcode_atts( array(
 		'post_type' => '',
 		'posts_per_page' => '5',
 		'pager' => '',
 	), $atts );
 	if ($param['pager'])  {
-		$pager_nonce = wp_create_nonce('DBM_search_pager');
+		$pager_nonce = wp_create_nonce('dbm_search_pager');
 	}
 	ob_start();
 ?>
@@ -25,7 +25,7 @@ function DBM_shortcode_search ($atts, $content) {
 	return ob_get_clean();
 }
 
-function DBM_shortcode_tax_checkbox($atts) {
+function dbm_shortcode_tax_checkbox($atts) {
 	ob_start();
 	$param = shortcode_atts( array(
 		'name' => '',
@@ -44,7 +44,7 @@ function DBM_shortcode_tax_checkbox($atts) {
 	}
 	return ob_get_clean();
 }
-function DBM_shortcode_tax_lable ($atts) {
+function dbm_shortcode_tax_lable ($atts) {
 	ob_start();
 	$param = shortcode_atts( array(
 		'name' => '',
@@ -56,7 +56,7 @@ function DBM_shortcode_tax_lable ($atts) {
 	return ob_get_clean();
 }
 
-function DBM_shortcode_tax_select($atts) {
+function dbm_shortcode_tax_select($atts) {
 	ob_start();
 	$param = shortcode_atts( array(
 		'name' => '',
@@ -86,7 +86,7 @@ function DBM_shortcode_tax_select($atts) {
 	return ob_get_clean();
 }
 
-function DBM_shortcode_textbox($atts) {
+function dbm_shortcode_textbox($atts) {
 	ob_start();
 	$param = shortcode_atts( array(
 		'name' => '',
@@ -105,7 +105,7 @@ function DBM_shortcode_textbox($atts) {
 	return ob_get_clean();
 }
 
-function DBM_shortcode_result_table($atts) {
+function dbm_shortcode_result_table($atts) {
 	ob_start();
 	$param = shortcode_atts( array(
 		'label' => '',
@@ -140,23 +140,27 @@ function DBM_shortcode_result_table($atts) {
 	return ob_get_clean();
 }
 
-function DBM_shortcode_result_pager($atts) {
+function dbm_shortcode_result_pager($atts) {
 	ob_start();
+	$param = shortcode_atts( array(
+		'label' => 'first, prev, next, last',
+	), $atts );
+	$label = explode(",", $param['label']);
 ?>
 <div class="ko-pager" data-bind="with: pager, visible: pager.items().length != 0">
-    <a class="btn btn-small" data-bind="click: goToFirst"> 最初 </a>
-    <a class="btn btn-small" data-bind="click: goToPrev"> 前ページ </a>
+    <a class="btn btn-small" data-bind="click: goToFirst"> <?php echo $label[0]; ?> </a>
+    <a class="btn btn-small" data-bind="click: goToPrev"> <?php echo $label[1]; ?> </a>
     <span data-bind="text: current"></span>/<span data-bind="text: pages"></span>
-    <a class="btn btn-small" data-bind="click: goToNext"> 次ページ </a>
-    <a class="btn btn-small" data-bind="click: goToLast"> 最後 </a>
+    <a class="btn btn-small" data-bind="click: goToNext"> <?php echo $label[2]; ?> </a>
+    <a class="btn btn-small" data-bind="click: goToLast"> <?php echo $label[3]; ?> </a>
     <span class="pager-summary" data-bind="visible: !isLoading()">
         <!--ko if: count() > 0 -->
-        <span data-bind="text: count"> </span> 件中
-        <span data-bind="text: offset() + 1"> </span> ～
-        <span data-bind="text: offset() + items().length"> </span> 件目を表示中
+        Found <span data-bind="text: count"> </span> records.
+        <span data-bind="text: offset() + 1"> </span> -
+        <span data-bind="text: offset() + items().length"> </span>
         <!--/ko-->
         <!--ko if: count() == 0 -->
-        アイテムが登録されていません
+        No records.
         <!--/ko-->
     </span>
     <span class="indicator" data-bind="visible: isLoading">
@@ -167,10 +171,10 @@ function DBM_shortcode_result_pager($atts) {
 <?php
 	return ob_get_clean();
 }
-add_shortcode( 'DBM_search', 'DBM_shortcode_search' );
-add_shortcode( 'DBM_tax_checkbox', 'DBM_shortcode_tax_checkbox' );
-add_shortcode( 'DBM_tax_select', 'DBM_shortcode_tax_select' );
-add_shortcode( 'DBM_tax_label', 'DBM_shortcode_tax_label' );
-add_shortcode( 'DBM_textbox', 'DBM_shortcode_textbox' );
-add_shortcode( 'DBM_result_table', 'DBM_shortcode_result_table' );
-add_shortcode( 'DBM_result_pager', 'DBM_shortcode_result_pager' );
+add_shortcode( 'dbm_search', 'dbm_shortcode_search' );
+add_shortcode( 'dbm_tax_checkbox', 'dbm_shortcode_tax_checkbox' );
+add_shortcode( 'dbm_tax_select', 'dbm_shortcode_tax_select' );
+add_shortcode( 'dbm_tax_label', 'dbm_shortcode_tax_label' );
+add_shortcode( 'dbm_textbox', 'dbm_shortcode_textbox' );
+add_shortcode( 'dbm_result_table', 'dbm_shortcode_result_table' );
+add_shortcode( 'dbm_result_pager', 'dbm_shortcode_result_pager' );

@@ -17,46 +17,105 @@ search and sort in backend, simple search form for frontend.
 This plugin make simple database from csv.
 Import from csv files to custom post type.
 
-*features
-  * you can make database from csv file
-  * import over 10000 records from csv file
-  * delete all data records
-  * support custom fields and taxonomies
-  * sort and search data in backend
-  * support shortcode for search form and result list in frontend
-  * import from csv, insert only. update record not supported.
+### features
+* you can make database from csv file
+* import over 10000 records from csv file
+* delete all data records
+* support custom fields and taxonomies
+* sort and search data in backend
+* support shortcode for search form and result list in frontend
+* import from csv, insert only. update record not supported.
 
-*Usage
-  1. Select DataBase Maker in admin menu. Add new post.
-  1. Title is DataBase name, it is displayed admin menu.
-  1. Content is frontend search form. If content is empty, default form inserted.
-  1. post_type is database type
-  1. format is colum names for csv. comma separated. see [column names]
-  1. status is default post status.
-  1. charcode is csv files encode
-  1. "skip first line" : If first line of csv is labels, check it.
-  1. public is data status. if it is checked, public access from frontend.
-  1. save post. 
-  1. Select your database name  in admin menu.
-  1. select csv file, import csv.
-  1. keyword search in all columns, taxonomy search supported.
-  1. Select DataBase Maker, select display, search form display in frontend.
+### Usage
 
-*column names
-  * post_title : title of the post
-  * post_author: (login or ID) The user name or user ID number
-  * post_date:
-  * post_excerpt:
-  * post_status:
-  * post_password:
-  * post_name:
-  * post_parent:
-  * menu_order:
-  * post_category:
-  * post_tags:
-  * tax_{taxonomy}: (string, comma separated) Any field prefixed with tax_ will be used as a custom taxonomy.
-  * {custom_field_key}: Any other column labels used as custom field.
-  * comment_status: (ÅeclosedÅf or ÅeopenÅf) Default is the option Åedefault_comment_statusÅf, or ÅeclosedÅf.
+#### Create Database
+1. Select DataBase Maker in admin menu. Add new post.
+1. Title is database name, it is displayed admin menu.
+1. Content is frontend search form. If content is empty, default form inserted.
+#### Edit csv settings
+1. post_type is database type
+1. format is colum names for csv. comma separated. see **column names**
+1. status is default post status.
+1. charcode is csv files encode
+1. "skip lines" : skip n lines
+1. "public" is data status. if it is checked, public access from frontend.
+1. save post. 
+
+#### Import data from csv file
+1. Select your database name  in admin menu.
+1. Select csv file and push "read csv", start importing.
+1. Display progress bar, please wait for a while.
+
+#### Data operation in admin menu
+* keyword search target all columns
+* taxonomy filter supported
+* title, date and  custom fields support sorting.
+* Delete all data supported
+
+#### Create search form for frontend
+1. Select DataBase Maker, edit database
+1. edit contents, see **Short codes**
+1. save contents then view posts
+
+### Column names
+* post_title : title of the post
+* post_author: (login or ID) The user name or user ID number
+* post_date:
+* post_excerpt:
+* post_status:
+* post_password:
+* post_name:
+* post_parent:
+* menu_order:
+* post_category:
+* post_tags:
+* tax_{taxonomy}: (string, comma separated) Any field prefixed with tax_ will be used as a custom taxonomy.
+* {custom_field_key}: Any other column labels used as custom field.
+* comment_status: (ÅeclosedÅf or ÅeopenÅf) Default is the option Åedefault_comment_statusÅf, or ÅeclosedÅf.
+
+### Short codes
+
+#### dbm_search
+Create form tag for search. This code is enclosing.
+
+##### option
+* post_type : **required** Search database post_type.
+* posts_per_page : default: 5
+* pager : This option set not empty string, pager support. default: ''
+
+#### dbm_tax_checkbox
+Create checkboxes for taxonomy
+
+##### option
+* name : **requried** taxonomy name.(No "tax_" prefix)
+
+#### dbm_tax_select
+Create select tag for taxonomy.
+
+##### option
+* name : **requried** taxonomy name.(No "tax_" prefix)
+* multiple : This option set not empty string, multiple select box. default: ''
+* size : Select tag size.
+
+#### dbm_textbox
+Create text input box
+
+##### option
+* name : Set search target column name. 's' is target all columns. default : 's'
+* required : true or false.  default : 'false'
+
+#### dbm_result_table
+Display search result table. This code need outside of dbm_search.
+
+##### option
+*label : th tag names, comma separated.
+*data : column names, comma separated.
+
+#### dbm_result_pager
+Output pager
+
+##### option
+* label : pager button label. default : 'first, prev, next, last'
 
 == Installation ==
 
