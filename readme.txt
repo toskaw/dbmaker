@@ -58,7 +58,7 @@ Import from csv files to custom post type.
 1. save contents then view posts
 
 ### Column names
-* post_title : title of the post
+* post_title: title of the post
 * post_author: (login or ID) The user name or user ID number
 * post_date:
 * post_excerpt:
@@ -71,7 +71,7 @@ Import from csv files to custom post type.
 * post_tags:
 * tax_{taxonomy}: (string, comma separated) Any field prefixed with tax_ will be used as a custom taxonomy.
 * {custom_field_key}: Any other column labels used as custom field.
-* comment_status: (ÅeclosedÅf or ÅeopenÅf) Default is the option Åedefault_comment_statusÅf, or ÅeclosedÅf.
+* comment_status: 'closed' or 'open' Default is the option 'default_comment_status' or 'closed'.
 
 ### Short codes
 
