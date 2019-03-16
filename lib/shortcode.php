@@ -90,12 +90,17 @@ function DBM_shortcode_textbox($atts) {
 	ob_start();
 	$param = shortcode_atts( array(
 		'name' => '',
+		'required' => 'false',
 	), $atts );
+	$required = '';
+	if ($param['required'] == 'true') {
+		$required = 'required';
+	}
 	if (!empty($param['name'])) {
-		echo "<input type='text' name='". $param['name'] ."'>";
+			echo "<input type='text' name='". $param['name'] . "' ". $required . ">";
 	}
 	else {
-		echo "<input type='text' name='s'>";
+		echo "<input type='text' name='s' ". $required . ">";
 	}
 	return ob_get_clean();
 }

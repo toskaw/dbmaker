@@ -133,7 +133,13 @@ add_action( 'admin_enqueue_scripts', 'DBM_admin_enqueue_scripts' );
 
 function DBM_enqueue_scripts() {
 
+	$script_load = false;
+	
 	if ('csv' == get_post_type()) {
+		$script_load = true;
+	}
+	$script_load = apply_filters('dbm_script_load_flag', $script_load);
+	if ($script_load) {
 		wp_register_script( 'DBM_ajax_search', plugins_url('js/dbm_ajax_search.js', __FILE__) );
 		// 引数作成
 		wp_localize_script('DBM_ajax_search', 'PARAM', array(
@@ -141,7 +147,7 @@ function DBM_enqueue_scripts() {
 			'search' => 'DBM_search',
 			'nonce' => wp_create_nonce('DBM_search'),
 		));
-
+		wp_enqueue_script('jquery_validation', 'https://cdn.jsdelivr.net/npm/jquery-validation@1.19.0/dist/jquery.validate.min.js', array('jquery'));
 		wp_enqueue_script('knockout', plugins_url('js/knockout-min.js', __FILE__));
 		wp_enqueue_script('DBM_ajax_search', plugins_url('js/dbm_ajax_search.js', __FILE__), array('jquery'), null, true);
 	}
@@ -178,7 +184,9 @@ function DBM_delete_all() {
 		else {
 			$options['nopaging'] = 'true';
 		}
-
+		set_time_limit(0);
+		wp_defer_term_counting( true );
+		wp_defer_comment_counting( true );
 		$wpdb->query( 'SET autocommit = 0;' );
 		register_shutdown_function( function(){
 			$GLOBALS['wpdb']->query( 'COMMIT;' );
@@ -189,9 +197,11 @@ function DBM_delete_all() {
 		foreach ($posts as $post_id) {
 			wp_delete_post($post_id, true);
 		}
-		$progress = 100 - floor(($remains - count($posts)) / $_SESSION['total'] * 100);
+		$progress = 100 - ceil(($remains - count($posts)) / $_SESSION['total'] * 100);
 
 		$wpdb->query( 'COMMIT;' );
+		wp_defer_term_counting( false );
+		wp_defer_comment_counting( false );
 
 		if ($progress == 100) {
 			unset($_SESSION['total']);
@@ -529,11 +539,11 @@ function DBM_search() {
 				if ($set_meta == false) {
 					unset($args['meta_query']);
 				}
+				$objects = array();
 
 				$query = new WP_Query($args);
 				// The Loop
 				if ( $query->have_posts() ) {
-					$objects = array();
 					while ( $query->have_posts() ) {
 						$object = array();
 						$query->the_post();

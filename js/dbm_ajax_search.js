@@ -78,10 +78,13 @@
 
 
     $(function(){
+        $(".ajax-search-form").validate({submitHandler: function(form) {return false;}});
         $("button.ajax").click(function(){
-            $(this).prop("disabled", true);
-            vm.pager.current(1);
-            $.ajaxStart($(this).val());
+            if ($(".ajax-search-form").valid()) {
+                $(this).prop("disabled", true);
+                vm.pager.current(1);
+                $.ajaxStart($(this).val());
+            }
             return false;
         });
     });
