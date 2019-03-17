@@ -48,15 +48,17 @@ function dbm_init() {
 		$option = DBM_Csv_option::getInstance($type);
 		// カスタム投稿タイプ登録
 		register_post_type($type, array(
-		'labels' => array(
-			'name' => __(get_the_title($option->id())),
-			'singular_name' => __(get_the_title($option->id()))),
+			'labels' => array(
+				'name' => __(get_the_title($option->id())),
+				'singular_name' => __(get_the_title($option->id()))),
 			'public' => $option->public(),
 			'show_ui' => true,
 			'show_in_rest' => $option->public(),
 			'supports' => array( 'title', 'custom-fields', 'editor' ),
 			'menu_position' => 65,
+			//'taxonomies' => array('category', 'post_tag'),
 		));
+		//register_taxonomy_for_object_type('category', $type);
 		// カスタム分類登録
 		$taxonomys = $option->get_taxonomys();
 		foreach ($taxonomys as $item) {
@@ -230,8 +232,12 @@ function dbm_import_csv() {
 				$upload_dir = wp_upload_dir();
 				$_SESSION['file'] = $filePath = $upload_dir['path'] . '/' . $_FILES["import_file"]["name"];
 				if (move_uploaded_file($_FILES['import_file']['tmp_name'], $filePath)) {
-					$count = exec('wc -l ' . $filePath);
-					$count = trim(str_replace($filePath, '', $count));
+					$file = new DBM_Csv_import($filePath);
+					$file->set_input_charset($options->charcode());
+					$file->seek(PHP_INT_MAX);
+					$count =$file->key() + 1;
+					//$count = exec('wc -l ' . $filePath);
+					//$count = trim(str_replace($filePath, '', $count));
 					$_SESSION['total'] = $count;
 					$_SESSION['start'] = 0;
 					if ($options->ignore_first_line()) {
@@ -345,27 +351,6 @@ function dbm_import_csv() {
 							$post['menu_order'] = $item;
 						}
 					}
-					// (string) comment status
-					else if ($key == 'comment_status') {
-						if ($item) {
-							$post['comment_status'] = $item;
-						}
-					}
-					// (string, comma separated) slug of post categories
-					else if ($key == 'post_category') {
-						if ($item) {
-							$categories = preg_split("/,+/", $item);
-							if ($categories) {
-								$post['post_category'] = wp_create_categories($item);
-							}
-						}
-					}
-					// (string, comma separated) name of post tags
-					else if ($key == 'post_tags') {
-						if ($item) {
-							$post['post_tags'] = $item;
-						}
-					}
 					// add any other data to post meta
 					// check if meta is custom taxonomy
 					else if (substr($key, 0, 4) == 'tax_') {
@@ -383,17 +368,8 @@ function dbm_import_csv() {
 						$meta[$key] = $item;
 					}
 				}
-				// Separate the post tags from $post array
-				if (isset($post['post_tags']) && !empty($post['post_tags'])) {
-					$post_tags = $post['post_tags'];
-					unset($post['post_tags']);
-				}
 				// Add the post
 				$post_id = wp_insert_post($post, true);
-				// Set post tags
-				if (isset($post_tags)) {
-					wp_set_post_tags($post_id, $post_tags);
-				}
 				// Set meta data
 				foreach ($meta as $key => $value) {
 					update_post_meta($post_id, $key, $value);
@@ -409,7 +385,7 @@ function dbm_import_csv() {
 		wp_defer_comment_counting( false );
 
 		$next = $file->key();
-		if ($next >= $_SESSION['total']) {
+		if ($next >= $_SESSION['total'] || $file->eof()) {
 			$progress = 100;
 			// file delete
 			unlink($filePath);
@@ -503,12 +479,6 @@ function dbm_search() {
 						else if ($key == 'post_parent') {
 							$args['post_parent'] = $item;
 						}
-						else if ($key == 'post_category') {
-							$args['cat'] = imploade(",", $item);
-						}
-						else if ($key == 'post_tags') {
-							$args['tag__in'] = $item;
-						}
 						else if (substr($key, 0, 4) == 'tax_') {
 							if (!empty($item[0])) {
 								$taxname = substr($key, 4);
@@ -566,13 +536,6 @@ function dbm_search() {
 							}
 							else if ($key == 'post_parent') {
 								$object[$key] = $post->post_parent;
-							}
-							else if ($key == 'post_category') {
-								$cat = get_the_category();
-								$object[$key] = $cat;
-							}
-							else if ($key == 'post_tags') {
-								$object[$key] = get_the_tags();
 							}
 							else if (substr($key, 0, 4) == 'tax_') {
 								$taxname = substr($key, 4);
