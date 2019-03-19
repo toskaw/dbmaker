@@ -1,41 +1,43 @@
 <?php
-function dbm_shortcode_search ($atts, $content) {
+function dbm_shortcode_search ( $atts, $content ) {
 	$param = shortcode_atts( array(
 		'post_type' => '',
 		'posts_per_page' => '5',
 		'pager' => '',
 	), $atts );
-	if ($param['pager'])  {
-		$pager_nonce = wp_create_nonce('dbm_search_pager');
+	if ( $param['pager'] )  {
+		$pager_nonce = wp_create_nonce( 'dbm_search_pager' );
 	}
 	ob_start();
 ?>
 <form role="search" method="post" class="ajax-search-form" >
-        <?php echo do_shortcode($content); ?>
+        <?php echo do_shortcode( $content ); ?>
 <?php
 		if ($param['pager']) {
 			echo "<input type='hidden' name='pager_nonce' value='$pager_nonce' />\n";
 		}
 ?>
-        <input type="hidden" name="post_type"  value="<?php echo $param['post_type']; ?>" />
-        <input type="hidden" id="posts_per_page" name="posts_per_page"  value="<?php echo $param['posts_per_page']; ?>" />
-	<div style="text-align:center;"><button type="submit" class="ajax search-submit" value="search">この条件で検索する</button></div>
+		<input type="hidden" name="post_type"  value="<?php echo $param['post_type']; ?>" />
+		<input type="hidden" id="posts_per_page" name="posts_per_page"  value="<?php echo $param['posts_per_page']; ?>" />
+		<div style="text-align:center;"><button type="submit" class="ajax search-submit" value="search">
+			<?php _e( 'Search', 'dbmaker' ); ?></button>
+		</div>
 </form>
 <?php
 	return ob_get_clean();
 }
 
-function dbm_shortcode_tax_checkbox($atts) {
+function dbm_shortcode_tax_checkbox( $atts ) {
 	ob_start();
 	$param = shortcode_atts( array(
 		'name' => '',
 	), $atts );
-	if (isset($param['name'])) {
+	if (isset( $param['name'] ) ) {
 		$taxonomy_name = $param['name'];
-		$args = array( 'orderby' => 'id', 'hide_empty' => false);
-		$taxonomys = get_terms($taxonomy_name, $args);
-		if (!is_wp_error($taxonomys) && count($taxonomys)) {
-			foreach ($taxonomys as $taxonomy){
+		$args = array( 'orderby' => 'id', 'hide_empty' => false );
+		$taxonomys = get_terms( $taxonomy_name, $args );
+		if ( !is_wp_error( $taxonomys ) && count( $taxonomys ) ) {
+			foreach ( $taxonomys as $taxonomy ) {
 			?>
 				<label class="search-label-<?php echo $taxonomy->slug; ?>"><input type="checkbox" name="<?php echo 'tax_' . $taxonomy->taxonomy;?>[]" value="<?php echo $taxonomy->slug; ?>"><?php echo $taxonomy->name; ?></label>
 <?php
@@ -44,39 +46,39 @@ function dbm_shortcode_tax_checkbox($atts) {
 	}
 	return ob_get_clean();
 }
-function dbm_shortcode_tax_lable ($atts) {
+function dbm_shortcode_tax_lable ( $atts ) {
 	ob_start();
 	$param = shortcode_atts( array(
 		'name' => '',
 	), $atts );
-	if (isset($param['name'])) {
-		$taxonomy_var = get_taxonomy($param['name']);
+	if ( isset($param['name'] ) ) {
+		$taxonomy_var = get_taxonomy( $param['name'] );
 		echo $taxonomy_var->label;
 	}
 	return ob_get_clean();
 }
 
-function dbm_shortcode_tax_select($atts) {
+function dbm_shortcode_tax_select( $atts ) {
 	ob_start();
 	$param = shortcode_atts( array(
 		'name' => '',
 		'multiple' => '',
 		'size' => ''
 	), $atts );
-	if (isset($param['name'])) {
+	if ( isset($param['name'] ) ) {
 		$taxonomy_name = $param['name'];
-		$args = array( 'orderby' => 'id', 'hide_empty' => false);
-		$taxonomys = get_terms($taxonomy_name, $args);
+		$args = array( 'orderby' => 'id', 'hide_empty' => false );
+		$taxonomys = get_terms( $taxonomy_name, $args );
 		$option = '';
-		if ($param['multiple']) {
+		if ( $param['multiple'] ) {
 			$option .= 'multiple ';
 		}
-		if ($param['size']) {
+		if ( $param['size'] ) {
 			$option .= 'size=' . $param['size'];
 		}
-		if (!is_wp_error($taxonomys) && count($taxonomys)) {
+		if ( !is_wp_error( $taxonomys ) && count( $taxonomys ) ) {
 			echo "<select name='tax_" . $param['name'] . "[]'" . $option .  ">";
-			echo "<option value=''>" . __(All) . "</option>";
+			echo "<option value=''>" . __( 'All terms', 'dbmaker' ) . "</option>";
 			foreach ($taxonomys as $taxonomy){
 				echo "<option value='" . $taxonomy->slug . "'>" . $taxonomy->name . "</option>";
 			}
@@ -86,17 +88,17 @@ function dbm_shortcode_tax_select($atts) {
 	return ob_get_clean();
 }
 
-function dbm_shortcode_textbox($atts) {
+function dbm_shortcode_textbox( $atts ) {
 	ob_start();
 	$param = shortcode_atts( array(
 		'name' => '',
 		'required' => 'false',
 	), $atts );
 	$required = '';
-	if ($param['required'] == 'true') {
+	if ( $param['required'] == 'true' ) {
 		$required = 'required';
 	}
-	if (!empty($param['name'])) {
+	if ( !empty($param['name'] ) ) {
 			echo "<input type='text' name='". $param['name'] . "' ". $required . ">";
 	}
 	else {
@@ -105,26 +107,26 @@ function dbm_shortcode_textbox($atts) {
 	return ob_get_clean();
 }
 
-function dbm_shortcode_result_table($atts) {
+function dbm_shortcode_result_table( $atts ) {
 	ob_start();
 	$param = shortcode_atts( array(
 		'label' => '',
 		'data' => '',
 	), $atts );
-	if (isset($param['data'])) {
+	if ( isset($param['data'] ) ) {
 		echo "<table>";
-		if (isset($param['label'])) {
-			$label = explode(",", $param['label']);
+		if ( isset($param['label'] ) ) {
+			$label = explode( ",", $param['label'] );
 			echo "<thead><tr>";
-			foreach ($label as $col) {
+			foreach ( $label as $col ) {
 				echo "<th>" . $col . "</th>";
 			}
 			echo "</tr></thead>";
 		}
-		$data = explode(",", $param['data']);
+		$data = explode( ",", $param['data'] );
 		echo "<tbody class='datalist' data-bind='foreach: object'><tr>";
-		foreach ($data as $col) {
-			if (substr($col, 0, 4) != 'tax_') {
+		foreach ( $data as $col ) {
+			if ( substr( $col, 0, 4 ) != 'tax_' ) {
 				echo "<td data-bind='text: " . $col . "'></td>";
 			}
 			else {
@@ -140,12 +142,12 @@ function dbm_shortcode_result_table($atts) {
 	return ob_get_clean();
 }
 
-function dbm_shortcode_result_pager($atts) {
+function dbm_shortcode_result_pager( $atts ) {
 	ob_start();
 	$param = shortcode_atts( array(
 		'label' => 'first, prev, next, last',
 	), $atts );
-	$label = explode(",", $param['label']);
+	$label = explode( ",", $param['label'] );
 ?>
 <div class="ko-pager" data-bind="with: pager, visible: pager.items().length != 0">
     <a class="btn btn-small" data-bind="click: goToFirst"> <?php echo $label[0]; ?> </a>

@@ -1,0 +1,90 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: dbmaker\n"
+"POT-Creation-Date: 2019-03-19 11:53+0900\n"
+"PO-Revision-Date: 2019-03-19 12:30+0900\n"
+"Last-Translator: Toshiyuki Kawashima <tos@fa2.so-net.ne.jp>\n"
+"Language-Team: \n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.0.5\n"
+"X-Poedit-Basepath: ..\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: dbmaker.php:45
+msgid "DataBase Maker"
+msgstr ""
+
+#: dbmaker.php:46
+msgid "DataBase Setting"
+msgstr "データベース設定"
+
+#: dbmaker.php:47
+msgid "Add New Database"
+msgstr "新規データベースを作成"
+
+#: dbmaker.php:102
+msgid "Import CSV"
+msgstr "CSVをインポートする"
+
+# 全削除
+#: dbmaker.php:103
+msgid "Delete all"
+msgstr "全削除"
+
+#: dbmaker.php:589
+msgid "csv settings"
+msgstr "CSV設定"
+
+#: dbmaker.php:600
+msgid "post_type"
+msgstr "投稿タイプ"
+
+#: dbmaker.php:601
+msgid "input post type"
+msgstr "投稿タイプ名を指定する"
+
+#: dbmaker.php:606
+msgid "format"
+msgstr "フォーマット"
+
+#: dbmaker.php:607
+msgid "column names order in csv file. comma separated."
+msgstr "csvファイルの項目名をカンマ区切りで入力する"
+
+#: dbmaker.php:612
+msgid "status"
+msgstr "ステータス"
+
+#: dbmaker.php:613
+msgid "default post status."
+msgstr "インポート時の初期ステータス"
+
+#: dbmaker.php:630
+msgid "character encoding"
+msgstr "文字コード"
+
+#: dbmaker.php:631
+msgid "input character encoding for csv file"
+msgstr "csvファイルの文字コードを指定する"
+
+#: dbmaker.php:646
+msgid "skip lines"
+msgstr "スキップする行数"
+
+#: dbmaker.php:651
+msgid "public access"
+msgstr "データを公開する"
+
+#: lib/shortcode.php:23
+msgid "Search"
+msgstr "検索"
+
+#: lib/shortcode.php:81
+msgid "All terms"
+msgstr "全て"

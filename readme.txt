@@ -1,6 +1,6 @@
 === DBMaker ===
-Contributors: dskugahara
-Donate link: 
+Contributors: castanet01
+Donate link: https://www.castanet.tokyo/donation
 Tags: database, csv, import, search
 Requires at least: 4.6
 Tested up to: 5.1
@@ -32,13 +32,14 @@ Import from csv files to custom post type.
 1. Select DataBase Maker in admin menu. Add new post.
 1. Title is database name, it is displayed admin menu.
 1. Content is frontend search form. If content is empty, default form inserted.
+
 #### Edit csv settings
 1. post_type is database type
-1. format is colum names for csv. comma separated. see **column names**
+1. format is column names order in csv files. comma separated. see **column names**
 1. status is default post status.
-1. charcode is csv files encode
+1. character encoding is csv file's encodeing
 1. "skip lines" : skip n lines
-1. "public" is data status. if it is checked, public access from frontend.
+1. "public access" is data status. if it is checked, public access from frontend.
 1. save post. 
 
 #### Import data from csv file

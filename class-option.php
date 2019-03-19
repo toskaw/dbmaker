@@ -13,29 +13,29 @@ class DBM_Csv_option {
 	public static function get_posttype_list() {
 		static $types = array();
 
-		if (empty($types)) {
+		if ( empty( $types ) ) {
 			$options = array(
 				'post_type' => 'csv',
 				'fields' => 'ids', // retrieve only ids
 			);
 			$query = new WP_Query();
-			$ids = $query->query($options);
-			foreach ($ids as $id ) {
-				$types[] = get_post_meta($id, 'save_post_type', true);
+			$ids = $query->query( $options );
+			foreach ( $ids as $id ) {
+				$types[] = get_post_meta( $id, 'save_post_type', true );
 			}
 		}
 		return $types;
 	}
 
-	public static function getInstance($posttype) {
+	public static function getInstance( $posttype ) {
 		static $instance = array();
-		if (!isset($instance[$posttype])) {
-			$instance[$posttype] = new self($posttype);
+		if ( !isset( $instance[$posttype] ) ) {
+			$instance[$posttype] = new self( $posttype );
 		}
 		return $instance[$posttype];
 	}
 
-	private function __construct($posttype) {
+	private function __construct( $posttype ) {
 		$this->post_type = $posttype;
 		$options = array(
 			'post_type' => 'csv',
@@ -44,17 +44,17 @@ class DBM_Csv_option {
 			'fields' => 'ids', // retrieve only ids
 		);
 		$query = new WP_Query();
-		$params = $query->query($options);
-		if ($params) {
+		$params = $query->query( $options );
+		if ( $params ) {
 			$option_id = $params[0];
-			$work = get_post_meta($option_id, "format", true);
-			$this->format = explode(",", $work);
+			$work = get_post_meta( $option_id, "format", true );
+			$this->format = explode( ",", $work );
 			$this->rawformat = $work;
-			$this->status = get_post_meta($option_id, "status", true);
-			$this->charcode = get_post_meta($option_id, "char_code", true);
-			$this->ignore_first_line = get_post_meta($option_id, "ignore_firstline", true);
+			$this->status = get_post_meta( $option_id, "status", true );
+			$this->charcode = get_post_meta( $option_id, "char_code", true );
+			$this->ignore_first_line = get_post_meta( $option_id, "ignore_firstline", true );
 			$this->id = $option_id;
-			$this->public_post_type = get_post_meta($option_id, "public_post_type", true);
+			$this->public_post_type = get_post_meta( $option_id, "public_post_type", true );
 		}
 		else {
 			$this->post_type = false;
@@ -65,7 +65,7 @@ class DBM_Csv_option {
 		return $this->post_type;
 	}
 
-	public function format($index) {
+	public function format( $index ) {
 		return $this->format[$index];
 	}
 
@@ -94,9 +94,9 @@ class DBM_Csv_option {
 	}
 	public function get_taxonomys() {
 		$taxonomys = array();
-		foreach ($this->format as $item) {
-			if (substr($item, 0, 4) == 'tax_') {
-				$taxonomys[] = substr($item, 4);
+		foreach ( $this->format as $item ) {
+			if ( substr($item, 0, 4) == 'tax_' ) {
+				$taxonomys[] = substr( $item, 4 );
 			}
 		}
 		return $taxonomys;

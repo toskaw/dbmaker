@@ -1,6 +1,6 @@
 <?php
 require_once 'lib/Mbstring.php';
-$ret = stream_filter_register("convert.mbstring.*", "Stream_Filter_Mbstring");
+$ret = stream_filter_register( "convert.mbstring.*", "Stream_Filter_Mbstring" );
 class DBM_Csv_import {
 
 	private $fileobj;
@@ -18,7 +18,7 @@ class DBM_Csv_import {
 				$this->filter = $this->path;
 			}
 
-			$this->fileobj = new SplFileObject($this->filter);
+			$this->fileobj = new SplFileObject( $this->filter );
 			$this->fileobj->setFlags(
 				//SplFileObject::READ_AHEAD |
 				//SplFileObject::SKIP_EMPTY |
@@ -29,16 +29,16 @@ class DBM_Csv_import {
 		return $this->fileobj;
 	}
 
-	public function __construct($path) {
+	public function __construct( $path ) {
 		$this->path = $path;
 	}
 
-	public function set_input_charset($charset) {
+	public function set_input_charset( $charset ) {
 		$this->charset = $charset;
 	}
 
-	public function seek($line) {
-		$this->file()->seek($line);
+	public function seek( $line ) {
+		$this->file()->seek( $line );
 	}
 
 	public function readline() {

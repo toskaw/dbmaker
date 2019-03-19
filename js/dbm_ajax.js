@@ -83,13 +83,13 @@
     $(function(){
         $("button.ajax").click(function(){
             if ($(this).val() == 'delete_all') {
-                if (!confirm('本当に削除しますか？')) {
+                if (!confirm('delete all data?')) {
                     $(this).modaal('close');
                     return false;
                 }
             }
             if ($(this).val() == 'import' && $("#csvfile").val().length == 0) {
-                alert("ファイルを選択してください");
+                alert("please select csv file");
                 $(this).modaal('close');
                 return false;
             }
