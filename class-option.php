@@ -10,8 +10,12 @@ class DBM_Csv_option {
 	private $id;
 	private $public_post_type;
 
-	public static function get_posttype_list() {
+	public static function get_posttype_list( $reload = false ) {
 		static $types = array();
+
+		if ( $reload ) {
+			unset( $types );
+		}
 
 		if ( empty( $types ) ) {
 			$options = array(
@@ -27,8 +31,11 @@ class DBM_Csv_option {
 		return $types;
 	}
 
-	public static function getInstance( $posttype ) {
+	public static function getInstance( $posttype, $reload = false ) {
 		static $instance = array();
+		if ( $reload ) {
+			unset( $instance );
+		}
 		if ( !isset( $instance[$posttype] ) ) {
 			$instance[$posttype] = new self( $posttype );
 		}
