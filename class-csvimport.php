@@ -1,5 +1,8 @@
 <?php
-require_once 'lib/Mbstring.php';
+if ( !class_exists( "Stream_Filter_Mbstring" ) ) {
+	require_once 'lib/Mbstring.php';
+}
+
 $ret = stream_filter_register( "convert.mbstring.*", "Stream_Filter_Mbstring" );
 class DBM_Csv_import {
 

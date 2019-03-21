@@ -26,7 +26,7 @@ Domain Path: /languages
     along with this program; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
-const DOMAIN = 'dbmaker';
+const DBM_DOMAIN = 'dbmaker';
 defined('ABSPATH') or die("you do not have access to this page!");
 
 require "class-option.php";
@@ -34,7 +34,7 @@ require "class-csvimport.php";
 require "lib/shortcode.php";
 
 function dbm_load_textdomain() {
-	load_plugin_textdomain( DOMAIN, false, basename( dirname( __FILE__ ) ) . '/languages' );
+	load_plugin_textdomain( DBM_DOMAIN, false, basename( dirname( __FILE__ ) ) . '/languages' );
 }
 add_action( 'plugins_loaded', 'dbm_load_textdomain' );
 
@@ -42,9 +42,9 @@ add_action( 'init', 'dbm_init' );
 function dbm_init() {
 	register_post_type( 'csv', array(
 		'labels' => array(
-			'name' => __( 'DataBase Maker', DOMAIN ),
-			'singular_name' => __( 'DataBase Setting', DOMAIN ),
-			'add_new_item' => __( 'Add New Database', DOMAIN ) ),
+			'name' => __( 'DataBase Maker', DBM_DOMAIN ),
+			'singular_name' => __( 'DataBase Setting', DBM_DOMAIN ),
+			'add_new_item' => __( 'Add New Database', DBM_DOMAIN ) ),
 		'public' => true,
 		'show_ui' => true,
 		'supports' => array( 'title', 'editor' ),
@@ -99,8 +99,8 @@ function dbm_add_button( $which )
 	<br class="clear">
 	<div class="alignleft">
 	<input type="file" id="csvfile" name="import_file" size="25">
-	<button type="button"  class="button-primary ajax inline" name="action" value="import"><?php _e( 'Import CSV', DOMAIN ) ?></button>
-	<button type="button"  class="button-primary ajax inline" name="action" value="delete_all"><?php _e( 'Delete all', DOMAIN ) ?></button>
+	<button type="button"  class="button-primary ajax inline" name="action" value="import"><?php _e( 'Import CSV', DBM_DOMAIN ) ?></button>
+	<button type="button"  class="button-primary ajax inline" name="action" value="delete_all"><?php _e( 'Delete all', DBM_DOMAIN ) ?></button>
 	</div>
 	<div id="inline" style="display:none;width:100%">
 		<span id="progress_box"></span>
@@ -587,7 +587,7 @@ function dbm_search() {
 
 // 固定カスタムフィールドボックス
 function dbm_add_fields() {
-	add_meta_box( 'csv_settings', __( 'csv settings', DOMAIN ),
+	add_meta_box( 'csv_settings', __( 'csv settings', DBM_DOMAIN ),
 		'dbm_insert_csv_fields', 'csv', 'normal', 'high' );
 }
 add_action( 'add_meta_boxes_csv', 'dbm_add_fields' );
@@ -598,20 +598,20 @@ function dbm_insert_csv_fields() {
 	// nonceフィールドを追加して後でチェックする
 	wp_nonce_field( 'dbm_save_csv_fields', 'dbm_meta_box_nonce' );
 
-	echo '<strong>' . __( 'post_type', DOMAIN ) . '</strong> : '
-		. __( 'input post type', DOMAIN ) 
+	echo '<strong>' . __( 'post_type', DBM_DOMAIN ) . '</strong> : '
+		. __( 'input post type', DBM_DOMAIN ) 
 		. '<br/> <input type="text" name="save_post_type" value="'
         . get_post_meta( $post->ID, 'save_post_type', true )
 		. '" size="50" /><br>';
 
-	echo '<strong>' . __( 'format', DOMAIN ) . '</strong> : '
-		. __( 'column names order in csv file. comma separated.', DOMAIN )
+	echo '<strong>' . __( 'format', DBM_DOMAIN ) . '</strong> : '
+		. __( 'column names order in csv file. comma separated.', DBM_DOMAIN )
 		. '</br> <input type="text" name="format" value="'
 		. get_post_meta( $post->ID, 'format', true )
 		. '" style="width:100%;"  /><br>';
 
-	echo '<strong>' . __( 'status', DOMAIN ) . '</strong> : '
-		. __( 'default post status.', DOMAIN )
+	echo '<strong>' . __( 'status', DBM_DOMAIN ) . '</strong> : '
+		. __( 'default post status.', DBM_DOMAIN )
 		. '<br/><select name="status">';
 	$list = array(
 		'publish', 'draft', 'pending', 'private'
@@ -628,8 +628,8 @@ function dbm_insert_csv_fields() {
 	echo '</select><br/>';
 	$list = mb_list_encodings();
 	$char_code = get_post_meta( $post->ID, 'char_code', true );
-	echo '<strong>' . __( 'character encoding', DOMAIN ) . '</strong> : '
-		. __( 'input character encoding for csv file', DOMAIN )
+	echo '<strong>' . __( 'character encoding', DBM_DOMAIN ) . '</strong> : '
+		. __( 'input character encoding for csv file', DBM_DOMAIN )
 		. '<br/><select name="char_code">';
 	foreach ( $list as $code ) {
 		if ( $code == $char_code ) {
@@ -644,12 +644,12 @@ function dbm_insert_csv_fields() {
 	if ( empty( $skip ) ) {
 		$skip = "0";
 	}
-	echo '<strong>' . __( 'skip lines', DOMAIN )
+	echo '<strong>' . __( 'skip lines', DBM_DOMAIN )
 		. '</strong> ： <input type="text" name="ignore_firstline" value="'.$skip.'" /><br/>';
 	if( get_post_meta( $post->ID, 'public_post_type', true ) == "1" ) {
 		$csv_label_check = "checked";
 	}//チェックされていたらcheckedを挿入
-	echo '<strong>' . __( 'public access', DOMAIN )
+	echo '<strong>' . __( 'public access', DBM_DOMAIN )
 		. '</strong>： <input type="checkbox" name="public_post_type" value="1" '
 		. $csv_label_check . ' ><br/>';
 }
