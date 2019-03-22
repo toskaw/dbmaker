@@ -124,16 +124,23 @@ Output pager
 
 
 == Frequently Asked Questions ==
-
+* Can i export data to csv file?
+Export csv file not supported yet. ToDo.
 
 == Screenshots ==
-
+1. csv settings
+2. data list in admin menu
+3. search form editor
+4. search form in frontend
 
 == Changelog ==
 
 = 1.0 =
 * first release
 
+== Upgrade Notice == 
+= 1.0 =
+* first release
 
 == Arbitrary section ==
 

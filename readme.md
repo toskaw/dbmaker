@@ -1,18 +1,18 @@
-=== DBMaker ===
-Contributors: dskugahara
-Donate link: 
-Tags: database, csv, import, search
-Requires at least: 4.6
-Tested up to: 5.1
-Stable tag: 1.0
-Requires PHP: 5.2.4
-License: GPLv2 or later
-License URI: https://www.gnu.org/licenses/gpl-2.0.html
+# DBMaker
+* Contributors: dskugahara
+* Donate link: 
+* Tags: database, csv, import, search
+* Requires at least: 4.6
+* Tested up to: 5.1
+* Stable tag: 1.0
+* Requires PHP: 5.2.4
+* License: GPLv2 or later
+* License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 Simple database plugin. import csv file, delete all records, 
 search and sort in backend, simple search form for frontend.
 
-== Description ==
+## Description
 
 This plugin make simple database from csv.
 Import from csv files to custom post type.
@@ -123,16 +123,24 @@ Output pager
 
 
 == Frequently Asked Questions ==
+* Can i export data to csv file?
+Export csv file not supported yet. ToDo.
 
 
 == Screenshots ==
-
+1. csv settings
+2. data list in admin menu
+3. search form editor
+4. search form in frontend
 
 == Changelog ==
 
 = 1.0 =
 * first release
 
+== Upgrade Notice == 
+= 1.0 =
+* first release
 
 == Arbitrary section ==
 
