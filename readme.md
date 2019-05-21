@@ -135,10 +135,18 @@ Export csv file not supported yet. ToDo.
 
 == Changelog ==
 
+= 1.1 =
+* add view link in database admin menu.
+* no import empty records.
+* add order and orderby parameter in frontend search.
+* Shortcode dbm_search: add parameter preload. Set it, data list load on init.(orderby post_id, ASC)
+* Back to seach result page in frontend, recently data list display.
+
 = 1.0 =
 * first release
 
 == Upgrade Notice == 
+
 = 1.0 =
 * first release
 

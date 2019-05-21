@@ -36,12 +36,13 @@
     }
     var vm = new viewModel();
     ko.applyBindings(vm);
-
+	var noload = false;
     $.extend({
     ajaxStart: function ajaxStart(value,target,from){
         target = target || $("#result_box");
         from = PARAM.ajax_url;
         if (vm.pager.items.peek().length == 0 && value == 'reload') return false;
+        if (noload) return false;
         vm.pager.isLoading(true);
         gogo();
         function gogo(){
@@ -61,6 +62,8 @@
                     success: function(res){
                         vm.object(res.data);
                         vm.pager.count(res.found_posts);
+                        res.current_page = vm.pager.current();
+                        $("#save_data").val(JSON.stringify(res));
                     },
                     complete: function() {
                         vm.pager.isLoading(false);
@@ -87,6 +90,20 @@
             }
             return false;
         });
+        if ($(".ajax-search-form").attr('preload')) {
+            if (preload.success) {
+                vm.object(preload.data);
+                vm.pager.count(preload.found_posts);
+            }
+        }
+        if ($("#save_data").val() != "") {
+            noload = true;
+            res = JSON.parse($("#save_data").val());
+            vm.pager.current(res.current_page);
+            vm.pager.count(res.found_posts);
+            vm.object(res.data);
+            noload = false;
+        }
     });
 
 

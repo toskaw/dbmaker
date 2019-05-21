@@ -93,11 +93,12 @@ function dbm_add_button( $which )
 {
 	global $post_type;
 	$option = DBM_Csv_option::getInstance($post_type);
-
 	if ( 'top' === $which && ( $option->post_type() ) ) {
+		$link = get_permalink($option->id());
 ?>
 	<br class="clear">
 	<div class="alignleft">
+	<a href="<?php echo $link; ?>" ><?php _e( 'View', DBM_DOMAIN ) ?></a>
 	<input type="file" id="csvfile" name="import_file" size="25">
 	<button type="button"  class="button-primary ajax inline" name="action" value="import"><?php _e( 'Import CSV', DBM_DOMAIN ) ?></button>
 	<button type="button"  class="button-primary ajax inline" name="action" value="delete_all"><?php _e( 'Delete all', DBM_DOMAIN ) ?></button>
@@ -285,12 +286,14 @@ function dbm_import_csv() {
 				$tax = array();
 				$post['post_type'] = sanitize_text_field( $_POST['post_type'] );
 				$post['post_status'] = $options->status();
+				$empty_flag = true;
 				foreach ( $data as $index => $item ) {
 					$key = $options->format( $index );
 					// (string) post slug
 					if ( $key == 'post_name' ) {
 						if ( $item ) {
 							$post['post_name'] = $item;
+							$empty_flag = false;
 						}
 					}
 					// (login or ID) post_author
@@ -302,6 +305,7 @@ function dbm_import_csv() {
 						}
 						if ( isset( $user ) && is_object( $user ) ) {
 							$post['post_author'] = $user->ID;
+							$empty_flag = false;
 							unset( $user );
 						}
 					}
@@ -309,53 +313,62 @@ function dbm_import_csv() {
 					elseif ( $key == 'post_date' ) {
 						if ( $item ) {
 							$post['post_date'] = date("Y-m-d H:i:s", strtotime( $item ) );
+							$empty_flag = false;
 						}
 					}
 					elseif ( $key == 'post_date_gmt' ) {
 						if ( $item ) {
 							$post['post_date_gmt'] = date("Y-m-d H:i:s", strtotime( $item ) );
+							$empty_flag = false;
 						}
 					}
 					// (string) post status
 					elseif ( $key == 'post_status' ) {
 						if ( $item ) {
 							$post['post_status'] = $item;
+							$empty_flag = false;
 						}
 					}
 					// (string) post password
 					elseif ( $key == 'post_password' ) {
 						if ( $item ) {
 							$post['post_password'] = $item;
+							$empty_flag = false;
 						}
 					}
 					// (string) post title
 					elseif ( $key == 'post_title' ) {
 						if ( $item ) {
 							$post['post_title'] = $item;
+							$empty_flag = false;
 						}
 					}
 					// (string) post content
 					elseif ( $key == 'post_content' ) {
 						if ( $item ) {
 							$post['post_content'] = $item;
+							$empty_flag = false;
 						}
 					}
 					// (string) post excerpt
 					if ($key == 'post_excerpt') {
 						if ( $item ) {
 							$post['post_excerpt'] = $item;
+							$empty_flag = false;
 						}
 					}
 					// (int) post parent
 					elseif ( $key == 'post_parent' ) {
 						if ( $item ) {
 							$post['post_parent'] = $item;
+							$empty_flag = false;
 						}
 					}
 					// (int) menu order
 					elseif ( $key == 'menu_order' ) {
 						if ( $item ) {
 							$post['menu_order'] = $item;
+							$empty_flag = false;
 						}
 					}
 					// add any other data to post meta
@@ -365,6 +378,9 @@ function dbm_import_csv() {
 						$customtaxes = preg_split( "/,+/", $item );
 						$taxname = substr( $key, 4 );
 						$tax[$taxname] = array();
+						if ( $item ) {
+							$empty_flag = false;
+						}
 						foreach ( $customtaxes as $key => $value ) {
 							$tax[$taxname][] = $value;
 						}
@@ -373,17 +389,22 @@ function dbm_import_csv() {
 					}
 					else {
 						$meta[$key] = $item;
+						if ( $item ) {
+							$empty_flag = false;
+						}
 					}
 				}
-				// Add the post
-				$post_id = wp_insert_post( $post, true );
-				// Set meta data
-				foreach ( $meta as $key => $value ) {
-					update_post_meta( $post_id, $key, $value );
-				}
-				// Set terms
-				foreach ( $tax as $key => $value ) {
-					wp_set_object_terms( $post_id, $value, $key );
+				if ( !$empty_flag ) {
+					// Add the post
+					$post_id = wp_insert_post( $post, true );
+					// Set meta data
+					foreach ( $meta as $key => $value ) {
+						update_post_meta( $post_id, $key, $value );
+					}
+					// Set terms
+					foreach ( $tax as $key => $value ) {
+						wp_set_object_terms( $post_id, $value, $key );
+					}
 				}
 			}
 		}
@@ -447,13 +468,31 @@ function dbm_search() {
 				$set_tax = false;
 				$args['meta_query'] = array();
 				$set_meta = false;
-				if ( isset($_REQUEST['s'] ) ) {
+				if ( isset( $_REQUEST['s'] ) ) {
 					// keyword
 					$args['s'] = sanitize_text_field( $_REQUEST['s'] );
 				}
 				else {
 					$args['s'] = '';
 				}
+				if ( isset( $_REQUEST['order'] ) ) {
+					if ( sanitize_text_field( $_REQUEST['order'] ) == 'DESC' ) {
+						$args['order'] = 'DESC';
+					}
+					else {
+						$args['order'] = 'ASC';
+					}
+				}
+				else {
+					$args['order'] = 'ASC';
+				}
+				if ( isset( $_REQUEST['orderby'] ) ) {
+					$args['orderby'] = sanitize_text_field( $_REQUEST['orderby'] );
+				}
+				else {
+					$args['orderby'] = 'ID';
+				}
+
 				foreach ( $param_list as $key ) {
 					if ( isset( $_REQUEST[$key] ) ) {
 						$item = $_REQUEST[$key];
@@ -559,6 +598,7 @@ function dbm_search() {
 								$object[$key] = get_post_meta( $post->ID, $key, true );
 							}
 						}
+						$object['post_id'] = $post->ID;
 						$objects[] = $object;
 					}
 				}
@@ -803,7 +843,7 @@ function dbm_posts_search_custom_fields( $orig_search, $query ) {
 		$options = DBM_Csv_option::getInstance( $post_type );
 		$taxonomys = $options->get_taxonomys();
 
-		if ( $q['search_terms'] ) {
+		if ( isset($q['search_terms']) && $q['search_terms'] ) {
 		    foreach ( $q['search_terms'] as $term ) {
 				$like_op  = 'LIKE';
 				$andor_op = 'OR';

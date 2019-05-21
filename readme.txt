@@ -3,8 +3,8 @@ Contributors: castanet01
 Donate link: https://www.castanet.tokyo/donation
 Tags: database, csv, import, search
 Requires at least: 4.6
-Tested up to: 5.1
-Stable tag: 1.0
+Tested up to: 5.2
+Stable tag: 1.1
 Requires PHP: 5.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -135,10 +135,18 @@ Export csv file not supported yet. ToDo.
 
 == Changelog ==
 
+= 1.1 =
+* add view link in database admin menu.
+* no import empty records.
+* add order and orderby parameter in frontend search.
+* Shortcode dbm_search: add parameter preload. Set it, data list load on init.(orderby post_id, ASC)
+* Back to seach result page in frontend, recently data list display.
+
 = 1.0 =
 * first release
 
 == Upgrade Notice == 
+
 = 1.0 =
 * first release
 
