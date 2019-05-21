@@ -3,7 +3,7 @@
 Plugin Name: DBMaker
 Plugin URI: https://www.castanet.tokyo/dbmaker/
 Description: Make data base from csv 
-Version: 1.0
+Version: 1.1
 Author: Toshiyuki Kawashima
 Author URI: https://www.castanet.tokyo/
 License: GPL2
