@@ -105,10 +105,11 @@
         overlay_close: false,
         is_locked: true
     });
+    function closeBar() {
+        $("#displaynonespan").remove();
+        $("#progress_box").empty();
+    }
+
 })(jQuery)
-function closeBar() {
-    $("#displaynonespan").remove();
-    $("#progress_box").empty();
-}
 
 

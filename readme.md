@@ -3,7 +3,7 @@
 * Donate link: 
 * Tags: database, csv, import, search
 * Requires at least: 4.6
-* Tested up to: 5.1
+* Tested up to: 5.4.2
 * Stable tag: 1.1
 * Requires PHP: 5.2.4
 * License: GPLv2 or later
@@ -134,6 +134,8 @@ Export csv file not supported yet. ToDo.
 4. search form in frontend
 
 == Changelog ==
+= 1.2 =
+*fix all delete bug.
 
 = 1.1 =
 * add view link in database admin menu.
