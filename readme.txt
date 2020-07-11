@@ -134,6 +134,7 @@ Export csv file not supported yet. ToDo.
 4. search form in frontend
 
 == Changelog ==
+
 = 1.2 =
 *fix all delete bug.
 
